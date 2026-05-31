@@ -67,6 +67,11 @@ tar_bayes_check <- function(spec,
   )
 
   ## --- ppc density (always, if y_rep declared) ---
+  # Build the runtime expression data[["<outcome>"]] explicitly. Note: we must
+  # construct the [[ ]] call rather than splicing data_sym[[spec$outcome]],
+  # which would evaluate at factory-build time instead of run time.
+  y_expr <- rlang::call2("[[", data_sym, spec$outcome)
+
   plot_names <- character(0)
   if (!is.null(spec$y_rep)) {
     ppc_dens_name <- nm("checkppcdens")
@@ -74,7 +79,7 @@ tar_bayes_check <- function(spec,
       ppc_dens_name,
       rlang::expr(stanviz::plot_ppc_dens(
         !!fit_sym,
-        y = !!data_sym[[!!spec$outcome]],
+        y = !!y_expr,
         yrep_var = !!spec$y_rep
       ))
     )
@@ -85,7 +90,7 @@ tar_bayes_check <- function(spec,
       ppc_stat_name,
       rlang::expr(stanviz::plot_ppc_stat_grid(
         !!fit_sym,
-        y = !!data_sym[[!!spec$outcome]],
+        y = !!y_expr,
         yrep_var = !!spec$y_rep
       ))
     )
